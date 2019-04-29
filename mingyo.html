@@ -1,0 +1,155 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <!-- JQuery -->
+    <script src="https://code.jquery.com/jquery.min.js"></script>
+    <!-- google charts -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+KR" rel="stylesheet">
+    <title>온습도 센서 <%SENSORDATA%></title>
+    <style>
+      body {
+          font-family: 'Noto Sans KR', sans-serif;
+      }
+      .page-header {
+          background-color: #58ACFA;
+          margin-top: 0;
+          padding: 20px 20px 20px 40px;
+      }
+      .page-header h1 {
+          color: #ffffff;
+          font-size: 30pt;
+          text-decoration: none;
+          padding-left: 15px;
+      }
+      .page-header h3 {
+        color: #ffffff;
+          padding-left: 20px;
+      }
+      .page-header p {
+        color: #ffffff;
+          padding-left: 25px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-header">
+      <h1>컴퓨터 및 전자 공학 개론</h1>
+      <h3>13주차 온습도 센서 실험</h3>
+      <p> > 온습도 센서: "Sensor <%SENSORDATA%>"</p>
+    </div>
+    <div id="Line_Controls_Chart">
+      <!-- 라인 차트 생성할 영역 -->
+      <div id="lineChartArea" style="padding:0px 20px 0px 0px;"></div> 
+      <!-- 컨트롤바를 생성할 영역 -->
+      <div id="controlsArea" style="padding:0px 20px 0px 0px;"></div>
+    </div>
+  </body>
+  <script type="text/javascript">
+    var chartDrowFun = {
+      chartDrow : function(){
+        var chartData = '';
+ 
+        //날짜형식 변경하고 싶으시면 이 부분 수정하세요.
+        var chartDateformat     = 'MM월dd일HH시mm분';
+        //라인차트의 라인 수
+        var chartLineCount    = 10;
+        //컨트롤러 바 차트의 라인 수
+        var controlLineCount    = 10;
+ 
+ 
+        function drawDashboard() {
+ 
+          var data = new google.visualization.DataTable();
+          //그래프에 표시할 컬럼 추가
+          data.addColumn('datetime' , '날짜');
+          data.addColumn('number'   , '온도');
+          data.addColumn('number'   , '습도');
+ 
+          //그래프에 표시할 데이터
+          data.addRows([
+            <%DATADATA%>
+          ]);
+
+          var chart = new google.visualization.ChartWrapper({
+            chartType   : 'LineChart',
+            containerId : 'lineChartArea', //라인 차트 생성할 영역
+            options     : {
+                            isStacked   : 'percent',
+                            focusTarget : 'category',
+                            height          : 500,
+                            width              : '100%',
+                            legend          : { position: "top", textStyle: {fontSize: 13}},
+                            pointSize        : 5,
+                            tooltip          : {textStyle : {fontSize:12}, showColorCode : true,trigger: 'both'},
+                            hAxis              :  {format: chartDateformat, gridlines:
+                                                    {
+                                                      count:chartLineCount,units: {
+                                                      years : {format: ['yyyy년']},
+                                                      months: {format: ['MM월']},
+                                                      days  : {format: ['dd일']},
+                                                      hours : {format: ['HH시']},
+                                                      minute : {format: ['mm분']}}
+                                                    },
+                                                    textStyle: {fontSize:12}
+                                                  },
+                            vAxis              : {minValue: 40,viewWindow:{min:0},gridlines:{count:-1},textStyle:{fontSize:12}},
+                            animation        : {startup: true,duration: 1000,easing: 'in' },
+                            annotations    : {
+                              pattern: chartDateformat,
+                              textStyle: {
+                              fontSize: 15,
+                              bold: true,
+                              italic: true,
+                              color: '#871b47',
+                              auraColor: '#d799ae',
+                              opacity: 0.8,
+                              pattern: chartDateformat
+                            }
+                          }
+                        }
+          });
+ 
+          var control = new google.visualization.ControlWrapper({
+            controlType: 'ChartRangeFilter',
+            containerId: 'controlsArea',  //control bar를 생성할 영역
+            options: {
+                ui:{
+                      chartType: 'LineChart',
+                      chartOptions: {
+                      chartArea: {'width': '60%','height' : 80},
+                        hAxis: {'baselineColor': 'none', format: chartDateformat, textStyle: {fontSize:12},
+                          gridlines:{count:controlLineCount,units: {
+                                years : {format: ['yyyy년']},
+                                months: {format: ['MM월']},
+                                days  : {format: ['dd일']},
+                                hours : {format: ['HH시']},
+                                minute : {format: ['mm분']}}
+                          }}
+                      }
+                },
+                  filterColumnIndex: 0
+              }
+          });
+
+          var date_formatter = new google.visualization.DateFormat({ pattern: chartDateformat});
+          date_formatter.format(data, 0);
+
+          var dashboard = new google.visualization.Dashboard(document.getElementById('Line_Controls_Chart'));
+          window.addEventListener('resize', function() { dashboard.draw(data); }, false); //화면 크기에 따라 그래프 크기 변경
+          dashboard.bind([control], [chart]);
+          dashboard.draw(data);
+        }
+        google.charts.setOnLoadCallback(drawDashboard);
+      }
+    }
+ 
+$(document).ready(function(){
+  google.charts.load('current', {'packages':['line','controls']});
+  chartDrowFun.chartDrow(); //chartDrow() 실행
+});
+
+  </script>
+</html>
